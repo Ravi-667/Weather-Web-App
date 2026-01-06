@@ -1,6 +1,6 @@
 .search-bar {
-  width: 100%;
-  margin-bottom: var(--spacing-lg);
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .search-input-wrapper {
