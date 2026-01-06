@@ -27,14 +27,29 @@ export async function fetchWeather(location) {
     const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+      if (response.status === 404) {
+        throw new Error(`Location "${location}" not found. Please try a different city name.`);
+      } else if (response.status === 429) {
+        throw new Error('API rate limit exceeded. Please try again later.');
+      } else if (response.status === 401) {
+        throw new Error('Invalid API key. Please check your configuration.');
+      } else {
+        throw new Error(`Unable to fetch weather data (Error ${response.status}). Please try again.`);
+      }
     }
     
     const data = await response.json();
     return transformWeatherData(data);
   } catch (error) {
+    // Re-throw with context if it's already a user-friendly error
+    if (error.message.includes('not found') || 
+        error.message.includes('rate limit') || 
+        error.message.includes('API key')) {
+      throw error;
+    }
+    // Network or parsing errors
     console.error('Error fetching weather:', error);
-    throw error;
+    throw new Error('Unable to connect to weather service. Please check your internet connection and try again.');
   }
 }
 
@@ -42,21 +57,26 @@ export async function fetchWeather(location) {
  * Transform Visual Crossing API response to our app format
  */
 function transformWeatherData(data) {
-  const currentConditions = data.currentConditions;
+  // Defensive checks for missing data
+  if (!data || !data.days || data.days.length === 0) {
+    throw new Error('Invalid weather data received');
+  }
+
+  const currentConditions = data.currentConditions || {};
   const allHours = [];
   
   // Collect all hourly data from the past 24 hours and future
   data.days.forEach(day => {
-    if (day.hours) {
+    if (day.hours && Array.isArray(day.hours)) {
       day.hours.forEach(hour => {
         allHours.push({
           datetime: `${day.datetime} ${hour.datetime}`,
-          temp: Math.round(hour.temp),
-          conditions: hour.conditions,
-          icon: hour.icon,
-          windspeed: hour.windspeed,
-          precipprob: hour.precipprob,
-          humidity: hour.humidity,
+          temp: Math.round(hour.temp ?? 0),
+          conditions: hour.conditions || 'N/A',
+          icon: hour.icon || 'cloudy',
+          windspeed: hour.windspeed ?? 0,
+          precipprob: hour.precipprob ?? 0,
+          humidity: hour.humidity ?? 0,
         });
       });
     }
@@ -64,29 +84,30 @@ function transformWeatherData(data) {
 
   // Get current hour index
   const currentHour = new Date().getHours();
-  const currentDayIndex = data.days.findIndex(day => day.datetime === new Date().toISOString().split('T')[0]);
+  const currentDate = new Date().toISOString().split('T')[0];
+  const currentDayIndex = data.days.findIndex(day => day.datetime === currentDate);
   
-  // Split into past and future
-  const currentIndex = currentDayIndex * 24 + currentHour;
+  // Split into past and future with safe defaults
+  const currentIndex = (currentDayIndex >= 0 ? currentDayIndex : 0) * 24 + currentHour;
   const past24Hours = allHours.slice(Math.max(0, currentIndex - 24), currentIndex);
   const future24Hours = allHours.slice(currentIndex, currentIndex + 24);
 
   return {
-    location: data.resolvedAddress,
-    timezone: data.timezone,
+    location: data.resolvedAddress || 'Unknown Location',
+    timezone: data.timezone || 'UTC',
     current: {
-      temp: Math.round(currentConditions.temp),
-      conditions: currentConditions.conditions,
-      icon: currentConditions.icon,
-      feelslike: Math.round(currentConditions.feelslike),
-      humidity: currentConditions.humidity,
-      windspeed: Math.round(currentConditions.windspeed),
-      precipprob: currentConditions.precipprob || 0,
-      uvindex: currentConditions.uvindex,
-      visibility: currentConditions.visibility,
+      temp: Math.round(currentConditions.temp ?? 0),
+      conditions: currentConditions.conditions || 'N/A',
+      icon: currentConditions.icon || 'cloudy',
+      feelslike: Math.round(currentConditions.feelslike ?? currentConditions.temp ?? 0),
+      humidity: currentConditions.humidity ?? 0,
+      windspeed: Math.round(currentConditions.windspeed ?? 0),
+      precipprob: currentConditions.precipprob ?? 0,
+      uvindex: currentConditions.uvindex ?? 0,
+      visibility: currentConditions.visibility ?? 0,
     },
-    past24Hours,
-    future24Hours,
+    past24Hours: past24Hours.length > 0 ? past24Hours : [],
+    future24Hours: future24Hours.length > 0 ? future24Hours : [],
   };
 }
 
