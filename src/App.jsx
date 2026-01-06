@@ -5,13 +5,20 @@ import SearchBar from './components/SearchBar';
 import CurrentWeather from './components/CurrentWeather';
 import ForecastStrip from './components/ForecastStrip';
 import LoadingSpinner from './components/LoadingSpinner';
+import TemperatureToggle from './components/TemperatureToggle';
+import GeolocationButton from './components/GeolocationButton';
 import { fetchWeather, getWeatherTheme } from './api/weather';
 import './App.css';
+
 
 function App() {
   const [weather, setWeather] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [lastSuccessfulLocation, setLastSuccessfulLocation] = useState('London');
+  const [temperatureUnit, setTemperatureUnit] = useState(() => {
+    return localStorage.getItem('temperatureUnit') || 'C';
+  });
 
   // Load weather for default location on mount
   useEffect(() => {
@@ -27,12 +34,15 @@ function App() {
   }, [weather]);
 
   const handleSearch = async (location) => {
+    if (!location || !location.trim()) return;
+    
     setIsLoading(true);
     setError(null);
 
     try {
       const data = await fetchWeather(location);
       setWeather(data);
+      setLastSuccessfulLocation(location);
     } catch (err) {
       setError(err.message || 'Failed to fetch weather data. Please try again.');
       console.error('Weather fetch error:', err);
@@ -42,9 +52,33 @@ function App() {
   };
 
   const handleRefresh = () => {
-    if (weather?.location) {
-      handleSearch(weather.location);
+    if (weather?.location || lastSuccessfulLocation) {
+      handleSearch(weather?.location || lastSuccessfulLocation);
     }
+  };
+
+  const handleToggleUnit = () => {
+    const newUnit = temperatureUnit === 'C' ? 'F' : 'C';
+    setTemperatureUnit(newUnit);
+    localStorage.setItem('temperatureUnit', newUnit);
+  };
+
+  const handleGeolocation = (coords) => {
+    if (coords === null) {
+      // Loading state triggered
+      setIsLoading(true);
+      return;
+    }
+    
+    if (coords === false) {
+      // Error occurred
+      setIsLoading(false);
+      return;
+    }
+    
+    // Search by coordinates
+    const locationString = `${coords.lat},${coords.lon}`;
+    handleSearch(locationString);
   };
 
   return (
@@ -65,21 +99,31 @@ function App() {
             🌤️ Weather App
           </motion.h1>
           
-          {weather && !isLoading && (
-            <motion.button
-              className="refresh-button"
-              onClick={handleRefresh}
-              whileHover={{ scale: 1.1, rotate: 180 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              title="Refresh weather"
-            >
-              <RefreshCw size={20} />
-            </motion.button>
-          )}
+          <div className="header-actions">
+            <TemperatureToggle unit={temperatureUnit} onToggle={handleToggleUnit} />
+            
+            {weather && !isLoading && (
+              <motion.button
+                className="refresh-button"
+                onClick={handleRefresh}
+                whileHover={{ scale: 1.1, rotate: 180 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                title="Refresh weather"
+              >
+                <RefreshCw size={20} />
+              </motion.button>
+            )}
+          </div>
         </div>
 
-        <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+        <div className="search-section">
+          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+          <GeolocationButton 
+            onLocationFound={handleGeolocation}
+            isLoading={isLoading}
+          />
+        </div>
 
         <AnimatePresence mode="wait">
           {isLoading && (
@@ -103,11 +147,14 @@ function App() {
             >
               <AlertCircle size={24} />
               <p>{error}</p>
+              {lastSuccessfulLocation && (
+                <p className="last-location">Last successful: {lastSuccessfulLocation}</p>
+              )}
               <button 
                 className="retry-button"
-                onClick={() => handleSearch('London')}
+                onClick={() => handleSearch(lastSuccessfulLocation)}
               >
-                Try London
+                Retry {lastSuccessfulLocation}
               </button>
             </motion.div>
           )}
@@ -120,19 +167,21 @@ function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <CurrentWeather weather={weather} />
+              <CurrentWeather weather={weather} unit={temperatureUnit} />
 
               {weather.past24Hours && weather.past24Hours.length > 0 && (
                 <ForecastStrip 
                   title="📊 Past 24 Hours" 
-                  hours={weather.past24Hours} 
+                  hours={weather.past24Hours}
+                  unit={temperatureUnit}
                 />
               )}
 
               {weather.future24Hours && weather.future24Hours.length > 0 && (
                 <ForecastStrip 
                   title="🔮 Next 24 Hours" 
-                  hours={weather.future24Hours} 
+                  hours={weather.future24Hours}
+                  unit={temperatureUnit}
                 />
               )}
             </motion.div>

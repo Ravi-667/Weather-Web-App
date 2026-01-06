@@ -10,11 +10,24 @@
   position: relative;
 }
 
+.search-section {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-lg);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
 }
 
 .app-title {
@@ -64,6 +77,12 @@
   font-size: var(--font-size-base);
   max-width: 400px;
   line-height: 1.6;
+}
+
+.last-location {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .retry-button {
