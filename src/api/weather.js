@@ -30,26 +30,32 @@ export async function fetchWeather(location) {
       if (response.status === 404) {
         throw new Error(`Location "${location}" not found. Please try a different city name.`);
       } else if (response.status === 429) {
-        throw new Error('API rate limit exceeded. Please try again later.');
-      } else if (response.status === 401) {
-        throw new Error('Invalid API key. Please check your configuration.');
+        // Rate limit exceeded - silently fall back to mock data
+        console.warn('API rate limit exceeded. Falling back to mock data.');
+        return getMockWeatherData(location);
+      } else if (response.status === 401 || response.status === 403) {
+        // Invalid or missing API key - fall back to mock data
+        console.warn('API authentication failed. Falling back to mock data.');
+        return getMockWeatherData(location);
       } else {
-        throw new Error(`Unable to fetch weather data (Error ${response.status}). Please try again.`);
+        // For other errors, also fall back to mock data instead of showing error
+        console.warn(`API error ${response.status}. Falling back to mock data.`);
+        return getMockWeatherData(location);
       }
     }
     
     const data = await response.json();
     return transformWeatherData(data);
   } catch (error) {
-    // Re-throw with context if it's already a user-friendly error
-    if (error.message.includes('not found') || 
-        error.message.includes('rate limit') || 
-        error.message.includes('API key')) {
+    // Only throw user-friendly errors for location not found
+    if (error.message.includes('not found')) {
       throw error;
     }
-    // Network or parsing errors
+    
+    // For network errors or other issues, fall back to mock data
     console.error('Error fetching weather:', error);
-    throw new Error('Unable to connect to weather service. Please check your internet connection and try again.');
+    console.warn('Falling back to mock data due to network error.');
+    return getMockWeatherData(location);
   }
 }
 
@@ -143,7 +149,7 @@ function getMockWeatherData(location) {
       });
 
       resolve({
-        location: location || 'Demo City',
+        location: `${location || 'Demo City'} (Demo Data)`,
         timezone: 'UTC',
         current: mockCurrent,
         past24Hours: Array.from({ length: 24 }, (_, i) => generateMockHour(-24 + i)),
