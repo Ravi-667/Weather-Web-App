@@ -1,0 +1,116 @@
+.forecast-strip-container {
+  margin-bottom: var(--spacing-xl);
+}
+
+.forecast-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+.forecast-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: var(--spacing-sm);
+  -webkit-overflow-scrolling: touch;
+}
+
+.forecast-strip {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xs) 0;
+  min-width: min-content;
+}
+
+.forecast-hour-card {
+  flex-shrink: 0;
+  width: 140px;
+  padding: var(--spacing-md);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.forecast-hour-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.hour-time {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hour-icon {
+  margin: var(--spacing-xs) 0;
+  filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.2));
+}
+
+.hour-temp {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hour-condition {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.3;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hour-details {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+  justify-content: space-around;
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hour-detail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.detail-icon {
+  font-size: var(--font-size-base);
+}
+
+@media (max-width: 768px) {
+  .forecast-hour-card {
+    width: 120px;
+    padding: var(--spacing-sm);
+  }
+
+  .hour-temp {
+    font-size: var(--font-size-xl);
+  }
+
+  .forecast-title {
+    font-size: var(--font-size-lg);
+  }
+}
