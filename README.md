@@ -274,7 +274,39 @@ This project is licensed under the MIT License.
 
 ## 📸 Screenshots
 
-Visit the [live demo](https://aerocast-io.netlify.app) to see the app in action!
+### Main Interface - London Weather
+![Hero View](./screenshots/hero_view.png)
+*Clean, modern glassmorphism UI showing current weather conditions, 24-hour forecast strips, and all weather metrics*
+
+---
+
+### Temperature Toggle Feature
+![Temperature Toggle](./screenshots/temperature_toggle.png)
+*Seamless switching between Celsius and Fahrenheit with smooth animations*
+
+---
+
+### Global Weather Search - Tokyo
+![Tokyo Weather](./screenshots/tokyo_search.png)
+*Search works for any city worldwide - showing Tokyo, Japan weather data*
+
+---
+
+### Different City - New York
+![New York Weather](./screenshots/new_york_weather.png)
+*Real-time weather data for New York City with accurate temperature and conditions*
+
+---
+
+### 24-Hour Forecast View
+![Forecast Strips](./screenshots/forecast_view.png)
+*Interactive hourly forecast showing temperature trends and weather icons*
+
+---
+
+### Responsive Design - Tablet View
+![Tablet View](./screenshots/tablet_view.png)
+*Fully responsive layout adapting seamlessly to tablet and mobile devices*
 
 ---
 
