@@ -1,12 +1,15 @@
 import { motion } from 'framer-motion';
 import { Wind, Droplets, Eye, Gauge } from 'lucide-react';
 import WeatherIcon from './WeatherIcon';
+import { convertTemperature } from '../utils/temperature';
 import './CurrentWeather.css';
 
-export default function CurrentWeather({ weather }) {
+export default function CurrentWeather({ weather, unit = 'C' }) {
   if (!weather) return null;
 
   const { current, location } = weather;
+  const displayTemp = convertTemperature(current.temp, unit);
+  const displayFeelsLike = convertTemperature(current.feelslike, unit);
 
   return (
     <motion.div 
@@ -41,9 +44,9 @@ export default function CurrentWeather({ weather }) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            {current.temp}°
+            {displayTemp}°{unit}
           </motion.h2>
-          <p className="feels-like">Feels like {current.feelslike}°</p>
+          <p className="feels-like">Feels like {displayFeelsLike}°{unit}</p>
         </div>
       </div>
 
@@ -90,10 +93,37 @@ export default function CurrentWeather({ weather }) {
           <Eye size={20} className="detail-icon" />
           <div className="detail-content">
             <span className="detail-label">Visibility</span>
-            <span className="detail-value">{current.visibility} km</span>
+            <span className="detail-value">{current.visibility || 'N/A'} {current.visibility ? 'km' : ''}</span>
           </div>
         </div>
+        
+        {current.uvindex !== undefined && current.uvindex > 0 && (
+          <div className="detail-item uv-item">
+            <div className="uv-content">
+              <span className="detail-label">UV Index</span>
+              <span className={`uv-badge uv-${getUVLevel(current.uvindex)}`}>
+                {current.uvindex} - {getUVLabel(current.uvindex)}
+              </span>
+            </div>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
+}
+
+function getUVLevel(uvIndex) {
+  if (uvIndex <= 2) return 'low';
+  if (uvIndex <= 5) return 'moderate';
+  if (uvIndex <= 7) return 'high';
+  if (uvIndex <= 10) return 'very-high';
+  return 'extreme';
+}
+
+function getUVLabel(uvIndex) {
+  if (uvIndex <= 2) return 'Low';
+  if (uvIndex <= 5) return 'Moderate';
+  if (uvIndex <= 7) return 'High';
+  if (uvIndex <= 10) return 'Very High';
+  return 'Extreme';
 }

@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import WeatherIcon from './WeatherIcon';
+import { convertTemperature } from '../utils/temperature';
 import './ForecastStrip.css';
 
-export default function ForecastStrip({ title, hours }) {
+export default function ForecastStrip({ title, hours, unit = 'C' }) {
   if (!hours || hours.length === 0) return null;
 
   return (
@@ -39,7 +40,7 @@ export default function ForecastStrip({ title, hours }) {
               </div>
               
               <div className="hour-temp">
-                {hour.temp}°
+                {convertTemperature(hour.temp, unit)}°{unit}
               </div>
               
               <div className="hour-condition">

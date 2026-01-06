@@ -1,0 +1,39 @@
+.temp-toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+.temp-toggle {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: all var(--transition-base);
+}
+
+.temp-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.temp-toggle span {
+  transition: all var(--transition-base);
+}
+
+.temp-toggle span.active {
+  color: var(--color-text-primary);
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.temp-toggle .divider {
+  opacity: 0.3;
+  margin: 0 2px;
+}
